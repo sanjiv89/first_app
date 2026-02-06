@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import BarOrderApp from './bar-order-app.jsx'
+import BarOrderApp from './BarOrderApp.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
