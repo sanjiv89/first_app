@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle, Clock, CreditCard, ShoppingCart, Plus, Minus, X, ChevronRight, Star, Sparkles, MapPin, Search, Navigation, Map, List } from 'lucide-react';
 
 // Mock data for different bars - in production, this would come from an API
@@ -72,6 +72,17 @@ export default function BarOrderApp() {
   const mapRef = useRef(null);
   const googleMapRef = useRef(null);
   const markersRef = useRef([]);
+
+  // Load Google Maps script
+  useEffect(() => {
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -214,7 +225,7 @@ export default function BarOrderApp() {
     }
   };
 
-  const handleZipCodeSearch = async (e) => {
+  const handleZipCodeSearch = useCallback(async (e) => {
     e.preventDefault();
     if (!zipCode || zipCode.length !== 5) {
       alert('Please enter a valid 5-digit ZIP code');
@@ -223,7 +234,7 @@ export default function BarOrderApp() {
 
     try {
       // Use Google Geocoding API to convert ZIP to coordinates
-      const apiKey = 'AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA'; // Replace with your actual key
+      const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual key
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode},USA&key=${apiKey}`;
       
       console.log('Geocoding request for:', zipCode);
@@ -259,7 +270,7 @@ export default function BarOrderApp() {
       console.error('Geocoding error:', error);
       alert('Error searching ZIP code: ' + error.message);
     }
-  };
+  }, [zipCode, setUserLocation, setMapView]);
 
   const filteredBars = searchQuery 
     ? bars.filter(bar => 
@@ -317,15 +328,14 @@ export default function BarOrderApp() {
   };
 
   // Bar Selection View
-  const BarSelectionView = React.useMemo(() => {
-    return () => (
+  const BarSelectionView = () => (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white p-6 shadow-xl">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2 mb-2">
-              <Sparkles className="animate-pulse" size={32} />
-              Find Your Bar
+              <span className="text-4xl">🍻</span>
+              Cheers
             </h1>
             <p className="text-sm opacity-90">Choose a nearby bar to start ordering</p>
           </div>
@@ -488,7 +498,7 @@ export default function BarOrderApp() {
         </div>
       </div>
     );
-  }, [zipCode, searchQuery, mapView, hoveredBar, userLocation, requestLocation, handleZipCodeSearch, filteredBars]);
+  };
 
   // Customer Menu View (same as before)
   const CustomerView = () => {
@@ -541,9 +551,9 @@ export default function BarOrderApp() {
         {/* Order Complete Notification */}
         {orderComplete && (
           <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50 animate-bounce">
-            <CheckCircle size={28} />
+            <span className="text-3xl">🍻</span>
             <div>
-              <p className="font-bold text-lg">Order Placed!</p>
+              <p className="font-bold text-lg">Cheers! Order Placed!</p>
               <p className="text-sm opacity-90">Your drinks are being prepared</p>
             </div>
           </div>
@@ -733,15 +743,6 @@ export default function BarOrderApp() {
 
   return (
     <div>
-      {/* Google Maps Script */}
-      {!window.google && (
-        <script
-          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA&libraries=places`}
-          async
-          defer
-        />
-      )}
-
       {/* Dev View Switcher */}
       <div className="fixed bottom-5 right-5 z-50 bg-black/90 backdrop-blur-sm text-white p-3 rounded-2xl text-sm flex gap-2 shadow-2xl">
         <button 
