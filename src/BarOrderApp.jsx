@@ -223,13 +223,18 @@ export default function BarOrderApp() {
 
     try {
       // Use Google Geocoding API to convert ZIP to coordinates
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA`
-      );
+      const apiKey = 'AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA'; // Replace with your actual key
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode},USA&key=${apiKey}`;
+      
+      console.log('Geocoding request for:', zipCode);
+      const response = await fetch(url);
       const data = await response.json();
+      
+      console.log('Geocoding response:', data);
 
       if (data.status === 'OK' && data.results.length > 0) {
         const location = data.results[0].geometry.location;
+        console.log('Found location:', location);
         setUserLocation(location);
         
         // Re-center map if it exists
@@ -241,11 +246,18 @@ export default function BarOrderApp() {
         // Switch to map view to show results
         setMapView(true);
       } else {
-        alert('Could not find location for this ZIP code. Please try again.');
+        console.error('Geocoding failed with status:', data.status);
+        if (data.status === 'REQUEST_DENIED') {
+          alert('API key error. Please check that Geocoding API is enabled and the API key is correct.');
+        } else if (data.status === 'ZERO_RESULTS') {
+          alert('No results found for ZIP code: ' + zipCode + '. Please try a different ZIP code.');
+        } else {
+          alert('Could not find location. Error: ' + data.status);
+        }
       }
     } catch (error) {
       console.error('Geocoding error:', error);
-      alert('Error searching ZIP code. Please try again.');
+      alert('Error searching ZIP code: ' + error.message);
     }
   };
 
@@ -305,8 +317,8 @@ export default function BarOrderApp() {
   };
 
   // Bar Selection View
-  const BarSelectionView = () => {
-    return (
+  const BarSelectionView = React.useMemo(() => {
+    return () => (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white p-6 shadow-xl">
@@ -346,11 +358,15 @@ export default function BarOrderApp() {
             <form onSubmit={handleZipCodeSearch} className="flex gap-2">
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                  setZipCode(value);
+                }}
                 placeholder="Enter ZIP code"
                 className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none text-lg"
-                maxLength="5"
               />
               <button
                 type="submit"
@@ -472,7 +488,7 @@ export default function BarOrderApp() {
         </div>
       </div>
     );
-  };
+  }, [zipCode, searchQuery, mapView, hoveredBar, userLocation, requestLocation, handleZipCodeSearch, filteredBars]);
 
   // Customer Menu View (same as before)
   const CustomerView = () => {
@@ -720,7 +736,7 @@ export default function BarOrderApp() {
       {/* Google Maps Script */}
       {!window.google && (
         <script
-          src={`https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`}
+          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA&libraries=places`}
           async
           defer
         />
