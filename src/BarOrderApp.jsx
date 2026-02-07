@@ -214,10 +214,39 @@ export default function BarOrderApp() {
     }
   };
 
-  const handleZipCodeSearch = (e) => {
+  const handleZipCodeSearch = async (e) => {
     e.preventDefault();
-    // In production, this would geocode the zip code using Google Geocoding API
-    alert('ZIP code search would use Google Geocoding API in production');
+    if (!zipCode || zipCode.length !== 5) {
+      alert('Please enter a valid 5-digit ZIP code');
+      return;
+    }
+
+    try {
+      // Use Google Geocoding API to convert ZIP to coordinates
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=YOUR_GOOGLE_MAPS_API_KEY`
+      );
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        setUserLocation(location);
+        
+        // Re-center map if it exists
+        if (googleMapRef.current) {
+          googleMapRef.current.setCenter(location);
+          googleMapRef.current.setZoom(14);
+        }
+        
+        // Switch to map view to show results
+        setMapView(true);
+      } else {
+        alert('Could not find location for this ZIP code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      alert('Error searching ZIP code. Please try again.');
+    }
   };
 
   const filteredBars = searchQuery 
@@ -691,7 +720,7 @@ export default function BarOrderApp() {
       {/* Google Maps Script */}
       {!window.google && (
         <script
-          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA&libraries=places`}
+          src={`https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`}
           async
           defer
         />
