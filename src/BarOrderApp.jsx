@@ -224,7 +224,7 @@ export default function BarOrderApp() {
     try {
       // Use Google Geocoding API to convert ZIP to coordinates
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=YOUR_GOOGLE_MAPS_API_KEY`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=AIzaSyCTvKipcJkA-Ph-zFHOU4gmDN6pfmOoKoA`
       );
       const data = await response.json();
 
