@@ -77,7 +77,7 @@ export default function BarOrderApp() {
   useEffect(() => {
     if (!window.google) {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCTvKipcJkA-Ph-zFH0U4gmDN6pfmOoKoA&libraries=places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=TBD_KEY&libraries=places';
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -234,7 +234,7 @@ export default function BarOrderApp() {
 
     try {
       // Use Google Geocoding API to convert ZIP to coordinates
-      const apiKey = 'AIzaSyCTvKipcJkA-Ph-zFH0U4gmDN6pfmOoKoA'; // Replace with your actual key
+      const apiKey = 'API_KEY'; // Replace with your actual key
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode},USA&key=${apiKey}`;
       
       console.log('Geocoding request for:', zipCode);
