@@ -1,773 +1,392 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, Clock, CreditCard, ShoppingCart, Plus, Minus, X, ChevronRight, Star, Sparkles, MapPin, Search, Navigation, Map, List } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 
-// Mock data for different bars - in production, this would come from an API
-const bars = [
+// Mock data
+const barsData = [
   {
     id: 1,
-    name: 'The Cozy Bar',
-    address: '123 Main St, Ann Arbor, MI',
-    lat: 42.2808,
-    lng: -83.7430,
-    distance: 0.5,
-    rating: 4.8,
-    image: '🍺',
+    name: 'Cozy Bar',
+    address: '123 Main St, Downtown',
+    phone: '555-0101',
+    coordinates: { lat: 40.7128, lng: -74.0060 },
     menu: [
-      { id: 1, name: 'Draft Beer', price: 7, category: 'Beer', image: '🍺', description: 'Crisp and refreshing', popular: true },
-      { id: 2, name: 'Craft IPA', price: 9, category: 'Beer', image: '🍺', description: 'Bold hoppy flavor' },
-      { id: 3, name: 'House Wine', price: 10, category: 'Wine', image: '🍷', description: 'Red or white' },
-      { id: 4, name: 'Margarita', price: 12, category: 'Cocktails', image: '🍹', description: 'Classic on the rocks', popular: true },
-      { id: 5, name: 'Old Fashioned', price: 14, category: 'Cocktails', image: '🥃', description: 'Timeless whiskey cocktail' },
-    ]
+      { id: 1, name: 'Margarita', price: 8, category: 'Cocktails' },
+      { id: 2, name: 'Beer', price: 5, category: 'Beer' },
+      { id: 3, name: 'Wine', price: 7, category: 'Wine' },
+    ],
   },
   {
     id: 2,
     name: 'Downtown Pub',
-    address: '456 Liberty St, Ann Arbor, MI',
-    lat: 42.2790,
-    lng: -83.7410,
-    distance: 1.2,
-    rating: 4.6,
-    image: '🍻',
+    address: '456 Oak Ave, Midtown',
+    phone: '555-0102',
+    coordinates: { lat: 40.7589, lng: -73.9851 },
     menu: [
-      { id: 1, name: 'Local Lager', price: 8, category: 'Beer', image: '🍺', description: 'Ann Arbor favorite', popular: true },
-      { id: 2, name: 'Whiskey Flight', price: 16, category: 'Spirits', image: '🥃', description: '4 premium whiskeys' },
-      { id: 3, name: 'Moscow Mule', price: 11, category: 'Cocktails', image: '🍸', description: 'Spicy and refreshing' },
-      { id: 4, name: 'Red Wine', price: 12, category: 'Wine', image: '🍷', description: 'Cabernet or Merlot', popular: true },
-    ]
+      { id: 4, name: 'Whiskey Neat', price: 10, category: 'Spirits' },
+      { id: 5, name: 'Craft Beer', price: 6, category: 'Beer' },
+      { id: 6, name: 'Mojito', price: 9, category: 'Cocktails' },
+    ],
   },
   {
     id: 3,
     name: 'Sunset Lounge',
-    address: '789 State St, Ann Arbor, MI',
-    lat: 42.2825,
-    lng: -83.7445,
-    distance: 2.1,
-    rating: 4.9,
-    image: '🌅',
+    address: '789 Sunset Blvd, Beach',
+    phone: '555-0103',
+    coordinates: { lat: 40.5731, lng: -73.9712 },
     menu: [
-      { id: 1, name: 'Mojito', price: 13, category: 'Cocktails', image: '🍹', description: 'Minty and refreshing', popular: true },
-      { id: 2, name: 'Cosmopolitan', price: 14, category: 'Cocktails', image: '🍸', description: 'Classic pink cocktail' },
-      { id: 3, name: 'Champagne', price: 18, category: 'Wine', image: '🥂', description: 'Sparkling celebration' },
-      { id: 4, name: 'Gin & Tonic', price: 10, category: 'Cocktails', image: '🍸', description: 'Light and crisp', popular: true },
-      { id: 5, name: 'Tequila Sunrise', price: 12, category: 'Cocktails', image: '🍹', description: 'Tropical vibes' },
-    ]
-  }
+      { id: 7, name: 'Piña Colada', price: 9, category: 'Cocktails' },
+      { id: 8, name: 'Tropical Beer', price: 6, category: 'Beer' },
+      { id: 9, name: 'Sangria', price: 8, category: 'Wine' },
+    ],
+  },
 ];
 
-export default function Cheers() {
-  const [selectedBar, setSelectedBar] = useState(null);
-  const [view, setView] = useState('customer');
-  const [tableNumber, setTableNumber] = useState(null);
-  const [cart, setCart] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [showCart, setShowCart] = useState(false);
-  const [orderComplete, setOrderComplete] = useState(false);
-  const [zipCode, setZipCode] = useState('');
-  const [userLocation, setUserLocation] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [mapView, setMapView] = useState(false);
-  const [hoveredBar, setHoveredBar] = useState(null);
-  
-  const mapRef = useRef(null);
-  const googleMapRef = useRef(null);
-  const markersRef = useRef([]);
-  const zipCodeRef = useRef('');
-
-  // Load Google Maps script
-  useEffect(() => {
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=TBD_KEY&libraries=places';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-  }, []);
+// Customer View
+function BarSelectionView({ bars, userLocation, onSelectBar, searchQuery, onSearchChange, zipCode, onZipCodeChange, onZipCodeSearch }) {
+  const [filteredBars, setFilteredBars] = useState(bars);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const table = params.get('table');
-    const barId = params.get('bar');
-    
-    if (table) setTableNumber(table);
-    if (barId) {
-      const bar = bars.find(b => b.id === parseInt(barId));
-      if (bar) setSelectedBar(bar);
-    }
-  }, []);
+    const filtered = bars.filter(bar =>
+      bar.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bar.address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredBars(filtered);
+  }, [searchQuery, bars]);
 
-  // Initialize Google Map
-  useEffect(() => {
-    if (mapView && mapRef.current && !googleMapRef.current && window.google) {
-      // Default center (Ann Arbor)
-      const center = userLocation || { lat: 42.2808, lng: -83.7430 };
-      
-      googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-        center: center,
-        zoom: 14,
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [{ visibility: "off" }]
-          }
-        ],
-        mapTypeControl: false,
-        streetViewControl: false,
-      });
-
-      // Add markers for each bar
-      bars.forEach(bar => {
-        const marker = new window.google.maps.Marker({
-          position: { lat: bar.lat, lng: bar.lng },
-          map: googleMapRef.current,
-          title: bar.name,
-          animation: window.google.maps.Animation.DROP,
-          icon: {
-            url: `data:image/svg+xml,${encodeURIComponent(`
-              <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 0C8.954 0 0 8.954 0 20c0 11.046 20 30 20 30s20-18.954 20-30C40 8.954 31.046 0 20 0z" fill="%23D97706"/>
-                <circle cx="20" cy="20" r="10" fill="white"/>
-                <text x="20" y="26" text-anchor="middle" font-size="16" fill="%23D97706">${bar.image}</text>
-              </svg>
-            `)}`,
-            scaledSize: new window.google.maps.Size(40, 50),
-          }
-        });
-
-        // Create info window
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: `
-            <div style="padding: 10px; max-width: 250px;">
-              <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: bold; color: #333;">${bar.image} ${bar.name}</h3>
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">${bar.address}</p>
-              <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <span style="background: #1F2937; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">⭐ ${bar.rating}</span>
-                <span style="background: #1F2937; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">📍 ${bar.distance} mi</span>
-              </div>
-              <button 
-                onclick="window.selectBarFromMap(${bar.id})"
-                style="width: 100%; background: linear-gradient(to right, #D97706, #B45309); color: white; border: none; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px;"
-              >
-                View Menu →
-              </button>
-            </div>
-          `
-        });
-
-        marker.addListener('click', () => {
-          // Close all other info windows
-          markersRef.current.forEach(m => m.infoWindow.close());
-          infoWindow.open(googleMapRef.current, marker);
-        });
-
-        marker.addListener('mouseover', () => {
-          setHoveredBar(bar.id);
-        });
-
-        marker.addListener('mouseout', () => {
-          setHoveredBar(null);
-        });
-
-        markersRef.current.push({ marker, infoWindow, barId: bar.id });
-      });
-
-      // Add user location marker if available
-      if (userLocation) {
-        new window.google.maps.Marker({
-          position: userLocation,
-          map: googleMapRef.current,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#D97706',
-            fillOpacity: 1,
-            strokeColor: 'white',
-            strokeWeight: 2,
-          }
-        });
-      }
-    }
-  }, [mapView, userLocation]);
-
-  // Global function for map info window buttons
-  useEffect(() => {
-    window.selectBarFromMap = (barId) => {
-      const bar = bars.find(b => b.id === barId);
-      if (bar) {
-        setSelectedBar(bar);
-      }
-    };
-    return () => {
-      delete window.selectBarFromMap;
-    };
-  }, []);
-
-  const requestLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(location);
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold text-yellow-400 mb-8">🍸 Cheers</h1>
+        
+        <div className="bg-gray-900 p-6 rounded-lg mb-8 border border-gray-800">
+          <h2 className="text-xl font-bold mb-4">Find Your Bar</h2>
           
-          // Re-center map if it exists
-          if (googleMapRef.current) {
-            googleMapRef.current.setCenter(location);
-          }
-        },
-        (error) => {
-          alert('Location access denied. Please enable location services or enter your ZIP code.');
-        }
-      );
-    }
-  };
+          <form onSubmit={onZipCodeSearch} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">ZIP Code</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength="5"
+                  value={zipCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 5);
+                    onZipCodeChange(val);
+                  }}
+                  placeholder="Enter ZIP code"
+                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded text-gray-100 focus:border-yellow-500 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded transition"
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+          </form>
 
-  const handleZipCodeSearch = useCallback(async (e) => {
-    e.preventDefault();
-    const currentZip = zipCodeRef.current;
-    if (!currentZip || currentZip.length !== 5) {
-      alert('Please enter a valid 5-digit ZIP code');
-      return;
-    }
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">Search Bars</label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search by name or address..."
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-gray-100 focus:border-yellow-500 focus:outline-none"
+            />
+          </div>
+        </div>
 
-    try {
-      // Use Google Geocoding API to convert ZIP to coordinates
-      const apiKey = 'API_KEY'; // Replace with your actual key
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentZip},USA&key=${apiKey}`;
-      
-      console.log('Geocoding request for:', currentZip);
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      console.log('Geocoding response:', data);
+        <div className="grid grid-cols-1 gap-4">
+          {filteredBars.map((bar) => (
+            <div
+              key={bar.id}
+              className="bg-gray-900 p-6 rounded-lg border border-gray-800 hover:border-yellow-500 transition cursor-pointer"
+              onClick={() => onSelectBar(bar)}
+            >
+              <h3 className="text-xl font-bold text-yellow-400 mb-2">{bar.name}</h3>
+              <p className="text-gray-300 mb-1">📍 {bar.address}</p>
+              <p className="text-gray-400 text-sm">📞 {bar.phone}</p>
+            </div>
+          ))}
+        </div>
 
-      if (data.status === 'OK' && data.results.length > 0) {
-        const location = data.results[0].geometry.location;
-        console.log('Found location:', location);
-        setUserLocation(location);
-        
-        // Re-center map if it exists
-        if (googleMapRef.current) {
-          googleMapRef.current.setCenter(location);
-          googleMapRef.current.setZoom(14);
-        }
-        
-        // Switch to map view to show results
-        setMapView(true);
-      } else {
-        console.error('Geocoding failed with status:', data.status);
-        if (data.status === 'REQUEST_DENIED') {
-          alert('API key error. Please check that Geocoding API is enabled and the API key is correct.');
-        } else if (data.status === 'ZERO_RESULTS') {
-          alert('No results found for ZIP code: ' + currentZip + '. Please try a different ZIP code.');
-        } else {
-          alert('Could not find location. Error: ' + data.status);
-        }
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      alert('Error searching ZIP code: ' + error.message);
-    }
-  }, [setUserLocation, setMapView]);
+        {filteredBars.length === 0 && (
+          <div className="text-center text-gray-400 mt-8">
+            <p>No bars found. Try a different search.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-  const filteredBars = searchQuery 
-    ? bars.filter(bar => 
-        bar.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bar.address.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : bars;
+// Bar Detail View
+function BarDetailView({ selectedBar, onBack, onPlaceOrder }) {
+  const [cart, setCart] = useState([]);
+  const [tableNumber, setTableNumber] = useState('');
 
   const addToCart = (item) => {
-    const existing = cart.find(i => i.id === item.id);
-    if (existing) {
-      setCart(cart.map(i => 
-        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-      ));
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
+    setCart([...cart, item]);
+  };
+
+  const removeFromCart = (index) => {
+    setCart(cart.filter((_, i) => i !== index));
+  };
+
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const handleSubmitOrder = () => {
+    if (!tableNumber.trim()) {
+      alert('Please enter a table number');
+      return;
     }
-  };
-
-  const updateQuantity = (itemId, delta) => {
-    setCart(cart.map(item => {
-      if (item.id === itemId) {
-        const newQuantity = item.quantity + delta;
-        return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
-      }
-      return item;
-    }).filter(Boolean));
-  };
-
-  const removeFromCart = (itemId) => {
-    setCart(cart.filter(item => item.id !== itemId));
-  };
-
-  const getCartTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  };
-
-  const handleCheckout = async () => {
-    const newOrder = {
+    if (cart.length === 0) {
+      alert('Please add items to your order');
+      return;
+    }
+    const order = {
       id: Date.now(),
       bar: selectedBar.name,
       table: tableNumber,
       items: cart,
-      total: getCartTotal(),
-      status: 'pending',
-      timestamp: new Date().toISOString()
+      total,
+      timestamp: new Date().toLocaleTimeString(),
     };
-    
-    setOrders([...orders, newOrder]);
-    setCart([]);
-    setShowCart(false);
-    setOrderComplete(true);
-    
-    setTimeout(() => setOrderComplete(false), 3000);
+    onPlaceOrder(order);
   };
 
-  // Bar Selection View
-  const BarSelectionView = () => (
-      <div className="min-h-screen bg-gray-950">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 text-white p-6 shadow-xl">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2 mb-2">
-              <span className="text-4xl">🍻</span>
-              Cheers
-            </h1>
-            <p className="text-sm opacity-90">Choose a nearby bar to start ordering</p>
-          </div>
+  if (!selectedBar) return null;
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <button
+          onClick={onBack}
+          className="mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded transition"
+        >
+          ← Back
+        </button>
+
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-800 mb-6">
+          <h1 className="text-3xl font-bold text-yellow-400 mb-2">{selectedBar.name}</h1>
+          <p className="text-gray-300">📍 {selectedBar.address}</p>
+          <p className="text-gray-400">📞 {selectedBar.phone}</p>
         </div>
 
-        {/* Location Search */}
-        <div className="max-w-4xl mx-auto p-5">
-          <div className="bg-gray-900 rounded-2xl shadow-xl p-6 mb-6 border-2 border-yellow-800">
-            <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
-              <MapPin className="text-yellow-400" size={24} />
-              Your Location
-            </h2>
-            
-            {/* Location Button */}
-            <button
-              onClick={requestLocation}
-              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 mb-4"
-            >
-              <Navigation size={24} />
-              Use My Location
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-gray-300"></div>
-              <span className="text-gray-400 text-sm">or</span>
-              <div className="flex-1 h-px bg-gray-300"></div>
-            </div>
-
-            {/* Zip Code Input */}
-            <form onSubmit={handleZipCodeSearch} className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={zipCode}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                  zipCodeRef.current = value;
-                  setZipCode(value);
-                }}
-                placeholder="Enter ZIP code"
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none text-lg"
-              />
-              <button
-                type="submit"
-                className="bg-yellow-500 text-white px-6 py-3 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-md hover:shadow-lg"
-              >
-                Search
-              </button>
-            </form>
-          </div>
-
-          {/* View Toggle: Map vs List */}
-          <div className="bg-gray-900 rounded-2xl shadow-lg p-4 mb-6 border-2 border-yellow-800 flex gap-2">
-            <button
-              onClick={() => setMapView(false)}
-              className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                !mapView 
-                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
-                  : 'bg-gray-800 text-gray-200 hover:bg-gray-200'
-              }`}
-            >
-              <List size={20} />
-              List View
-            </button>
-            <button
-              onClick={() => setMapView(true)}
-              className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                mapView 
-                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
-                  : 'bg-gray-800 text-gray-200 hover:bg-gray-200'
-              }`}
-            >
-              <Map size={20} />
-              Map View
-            </button>
-          </div>
-
-          {/* Map View */}
-          {mapView ? (
-            <div className="bg-gray-900 rounded-2xl shadow-xl overflow-hidden border-2 border-yellow-800">
-              <div 
-                ref={mapRef} 
-                className="w-full h-[500px]"
-              />
-              <div className="p-4 bg-gradient-to-r from-gray-900 to-black">
-                <p className="text-sm text-gray-300 text-center">
-                  📍 Click on a marker to see bar details and view menu
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Search Bar */}
-              <div className="bg-gray-900 rounded-2xl shadow-lg p-4 mb-6 border-2 border-yellow-800">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search bars by name or address..."
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none text-lg"
-                  />
+        <div className="grid grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Menu</h2>
+            <div className="space-y-2">
+              {selectedBar.menu.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-gray-900 p-4 rounded border border-gray-800 flex justify-between items-center"
+                >
+                  <div>
+                    <p className="font-bold text-gray-100">{item.name}</p>
+                    <p className="text-sm text-gray-400">{item.category}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-yellow-400 font-bold">${item.price}</p>
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded transition"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="bg-gray-900 p-6 rounded border border-gray-800 sticky top-6">
+              <h3 className="text-xl font-bold text-yellow-400 mb-4">Your Order</h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Table Number</label>
+                <input
+                  type="text"
+                  value={tableNumber}
+                  onChange={(e) => setTableNumber(e.target.value)}
+                  placeholder="e.g., 5"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-gray-100 focus:border-yellow-500 focus:outline-none"
+                />
               </div>
 
-              {/* Bars List */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-                  <MapPin className="text-yellow-400" size={24} />
-                  Nearby Bars ({filteredBars.length})
-                </h3>
-                
-                {filteredBars.map(bar => (
-                  <div
-                    key={bar.id}
-                    onClick={() => setSelectedBar(bar)}
-                    onMouseEnter={() => setHoveredBar(bar.id)}
-                    onMouseLeave={() => setHoveredBar(null)}
-                    className={`bg-gray-900 rounded-2xl shadow-lg p-5 hover:shadow-2xl transition-all cursor-pointer border-2 ${
-                      hoveredBar === bar.id ? 'border-purple-400 scale-105' : 'border-yellow-800'
-                    } transform group`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="text-6xl">{bar.image}</div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h3 className="text-2xl font-bold text-gray-100 group-hover:text-yellow-400 transition-colors">
-                              {bar.name}
-                            </h3>
-                            <p className="text-sm text-gray-300 flex items-center gap-1 mt-1">
-                              <MapPin size={14} />
-                              {bar.address}
-                            </p>
-                          </div>
-                          <ChevronRight className="text-yellow-400 group-hover:translate-x-1 transition-transform" size={28} />
-                        </div>
-                        
-                        <div className="flex items-center gap-4 mt-3">
-                          <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-full">
-                            <Star size={16} fill="#FCD34D" className="text-yellow-400" />
-                            <span className="font-bold text-gray-100">{bar.rating}</span>
-                          </div>
-                          <div className="flex items-center gap-1 bg-gray-900 px-3 py-1 rounded-full">
-                            <MapPin size={16} className="text-yellow-400" />
-                            <span className="font-semibold text-yellow-500">{bar.distance} mi away</span>
-                          </div>
-                          <div className="bg-green-50 px-3 py-1 rounded-full">
-                            <span className="font-semibold text-green-700">Open Now</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+              <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
+                {cart.map((item, index) => (
+                  <div key={index} className="flex justify-between items-center bg-gray-800 p-2 rounded">
+                    <span className="text-sm">{item.name} - ${item.price}</span>
+                    <button
+                      onClick={() => removeFromCart(index)}
+                      className="text-red-400 hover:text-red-300 text-sm font-bold"
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
               </div>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
 
-  // Customer Menu View (same as before)
-  const CustomerView = () => {
-    if (!selectedBar) return BarSelectionView();;
-
-    const categories = [...new Set(selectedBar.menu.map(item => item.category))];
-    const [selectedCategory, setSelectedCategory] = useState('All');
-
-    const filteredMenu = selectedCategory === 'All' 
-      ? selectedBar.menu 
-      : selectedBar.menu.filter(item => item.category === selectedCategory);
-
-    return (
-      <div className="min-h-screen bg-gray-950">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 text-white p-5 sticky top-0 z-10 shadow-2xl">
-          <div className="flex justify-between items-center max-w-4xl mx-auto">
-            <div className="flex-1">
-              <button
-                onClick={() => setSelectedBar(null)}
-                className="text-sm opacity-90 hover:opacity-100 flex items-center gap-1 mb-2 bg-gray-900/20 px-3 py-1 rounded-full"
-              >
-                ← Change Bar
-              </button>
-              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                <span className="text-3xl">{selectedBar.image}</span>
-                {selectedBar.name}
-              </h1>
-              {tableNumber && (
-                <p className="text-sm opacity-90 mt-1 flex items-center gap-1">
-                  <span className="bg-gray-900/20 px-2 py-0.5 rounded-full">Table {tableNumber}</span>
-                </p>
-              )}
-            </div>
-            <button 
-              onClick={() => setShowCart(true)}
-              className="relative bg-gray-900 text-yellow-500 px-5 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-900 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-            >
-              <ShoppingCart size={22} />
-              <span className="hidden sm:inline">Cart</span>
-              {cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs w-7 h-7 rounded-full flex items-center justify-center font-bold shadow-lg animate-bounce">
-                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Order Complete Notification */}
-        {orderComplete && (
-          <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50 animate-bounce">
-            <span className="text-3xl">🍻</span>
-            <div>
-              <p className="font-bold text-lg">Cheers! Order Placed!</p>
-              <p className="text-sm opacity-90">Your drinks are being prepared</p>
-            </div>
-          </div>
-        )}
-
-        {/* Category Filter */}
-        <div className="bg-gray-900/80 backdrop-blur-md border-b border-yellow-800 sticky top-[100px] z-10 shadow-md">
-          <div className="max-w-4xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-            <button
-              onClick={() => setSelectedCategory('All')}
-              className={`px-5 py-2.5 rounded-full whitespace-nowrap transition-all font-semibold shadow-md ${
-                selectedCategory === 'All' 
-                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg scale-105' 
-                  : 'bg-gray-900 text-gray-200 hover:bg-gray-900 hover:scale-105'
-              }`}
-            >
-              ✨ All Drinks
-            </button>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2.5 rounded-full whitespace-nowrap transition-all font-semibold shadow-md ${
-                  selectedCategory === cat 
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg scale-105' 
-                    : 'bg-gray-900 text-gray-200 hover:bg-gray-900 hover:scale-105'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Menu Grid */}
-        <div className="max-w-4xl mx-auto p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {filteredMenu.map(item => (
-              <div 
-                key={item.id} 
-                className="bg-gray-900 rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-yellow-800 hover:border-purple-300 relative group"
-              >
-                {item.popular && (
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg z-10">
-                    <Star size={12} fill="currentColor" />
-                    Popular
-                  </div>
-                )}
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4 mb-3">
-                        <div className="text-6xl drop-shadow-lg">{item.image}</div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-xl text-gray-100 mb-1">{item.name}</h3>
-                          <p className="text-sm text-gray-400 mb-2">{item.description}</p>
-                          <span className="inline-block bg-gray-800 text-yellow-500 text-xs px-3 py-1 rounded-full font-semibold">
-                            {item.category}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <p className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
-                          ${item.price}
-                        </p>
-                        <button
-                          onClick={() => addToCart(item)}
-                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2 font-bold"
-                        >
-                          <Plus size={20} />
-                          Add
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cart Overlay - same as before */}
-        {showCart && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
-            <div className="bg-gray-900 w-full md:max-w-2xl md:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="sticky top-0 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-5 flex justify-between items-center shadow-lg z-10">
-                <div>
-                  <h2 className="text-2xl font-bold">Your Order</h2>
-                  <p className="text-sm opacity-90">{selectedBar.name} • {cart.length} {cart.length === 1 ? 'item' : 'items'}</p>
-                </div>
-                <button 
-                  onClick={() => setShowCart(false)} 
-                  className="p-2 hover:bg-gray-900/20 rounded-full transition-all"
+              <div className="border-t border-gray-700 pt-4">
+                <p className="text-lg font-bold text-yellow-400 mb-4">Total: ${total.toFixed(2)}</p>
+                <button
+                  onClick={handleSubmitOrder}
+                  className="w-full px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded transition"
                 >
-                  <X size={28} />
+                  Place Order
                 </button>
               </div>
-
-              {cart.length === 0 ? (
-                <div className="p-12 text-center text-gray-400">
-                  <ShoppingCart size={64} className="mx-auto mb-4 opacity-30" />
-                  <p className="text-xl font-semibold mb-2">Your cart is empty</p>
-                  <p className="text-sm">Add some drinks to get started!</p>
-                </div>
-              ) : (
-                <>
-                  <div className="p-5 space-y-3">
-                    {cart.map(item => (
-                      <div key={item.id} className="flex items-center gap-4 bg-gradient-to-r from-gray-900 to-black p-4 rounded-2xl border-2 border-yellow-800 shadow-md">
-                        <span className="text-5xl">{item.image}</span>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-lg text-gray-100">{item.name}</h4>
-                          <p className="text-sm text-gray-300">${item.price} each</p>
-                        </div>
-                        <div className="flex items-center gap-3 bg-gray-900 rounded-xl p-2 shadow-md">
-                          <button
-                            onClick={() => updateQuantity(item.id, -1)}
-                            className="bg-gray-800 text-yellow-500 p-2 rounded-lg hover:bg-purple-200 transition-all"
-                          >
-                            <Minus size={18} />
-                          </button>
-                          <span className="w-10 text-center font-bold text-lg">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, 1)}
-                            className="bg-gray-800 text-yellow-500 p-2 rounded-lg hover:bg-purple-200 transition-all"
-                          >
-                            <Plus size={18} />
-                          </button>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-xl text-yellow-500">${(item.price * item.quantity).toFixed(2)}</p>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 text-sm hover:underline font-semibold"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="sticky bottom-0 bg-gray-900 border-t-2 border-yellow-800 p-5 shadow-2xl">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xl font-semibold text-gray-200">Total</span>
-                      <span className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
-                        ${getCartTotal().toFixed(2)}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-5 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
-                    >
-                      <CreditCard size={28} />
-                      Pay ${getCartTotal().toFixed(2)} & Order
-                      <ChevronRight size={24} />
-                    </button>
-                    <p className="text-xs text-center text-gray-400 mt-3">
-                      💳 Secure payment powered by Stripe (Demo Mode)
-                    </p>
-                  </div>
-                </>
-              )}
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Staff View
+function StaffView({ orders, onClearOrder }) {
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-yellow-400 mb-6">📋 Active Orders</h1>
+
+        {orders.length === 0 ? (
+          <div className="text-center text-gray-400 mt-8">
+            <p>No pending orders</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-gray-900 p-6 rounded border border-yellow-500"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-lg font-bold text-yellow-400">{order.bar}</p>
+                    <p className="text-gray-300">Table {order.table}</p>
+                    <p className="text-gray-400 text-sm">{order.timestamp}</p>
+                  </div>
+                  <button
+                    onClick={() => onClearOrder(order.id)}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded transition"
+                  >
+                    Ready
+                  </button>
+                </div>
+
+                <div className="space-y-1">
+                  {order.items.map((item, i) => (
+                    <p key={i} className="text-gray-300">
+                      {item.name} - ${item.price}
+                    </p>
+                  ))}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <p className="text-lg font-bold text-yellow-400">Total: ${order.total.toFixed(2)}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    );
+    </div>
+  );
+}
+
+// Main App
+export default function Cheers() {
+  const [currentView, setCurrentView] = useState('selection');
+  const [selectedBar, setSelectedBar] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
+
+  const handleZipCodeSearch = (e) => {
+    e.preventDefault();
+    if (zipCode.length === 5) {
+      alert(`Searching bars near ${zipCode}...`);
+    }
   };
 
-  // Staff View - simplified
-  const StaffView = () => {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
-        <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-6 rounded-2xl shadow-xl mb-8">
-          <h1 className="text-3xl font-bold">Staff Dashboard</h1>
-          <p className="text-sm opacity-90 mt-1">Manage incoming orders</p>
-        </div>
-        <div className="text-center text-gray-300">
-          <Clock size={64} className="mx-auto mb-4 opacity-30" />
-          <p className="text-xl font-semibold">No orders yet</p>
-          <p className="text-sm">Orders will appear here once customers start ordering</p>
-        </div>
-      </div>
-    );
+  const handleSelectBar = (bar) => {
+    setSelectedBar(bar);
+    setCurrentView('bar');
+  };
+
+  const handlePlaceOrder = (order) => {
+    setOrders([...orders, order]);
+    alert(`Order placed! Bar: ${order.bar}, Table: ${order.table}`);
+    setCurrentView('selection');
+    setSelectedBar(null);
+  };
+
+  const handleClearOrder = (orderId) => {
+    setOrders(orders.filter((o) => o.id !== orderId));
   };
 
   return (
-    <div>
-      {/* Dev View Switcher */}
-      <div className="fixed bottom-5 right-5 z-50 bg-black/90 backdrop-blur-sm text-white p-3 rounded-2xl text-sm flex gap-2 shadow-2xl">
-        <button 
-          onClick={() => setView('customer')}
-          className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            view === 'customer' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 shadow-lg' : 'bg-gray-700 hover:bg-gray-600'
-          }`}
-        >
-          👥 Customer
-        </button>
-        <button 
-          onClick={() => setView('staff')}
-          className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            view === 'staff' ? 'bg-gradient-to-r from-green-600 to-teal-600 shadow-lg' : 'bg-gray-700 hover:bg-gray-600'
-          }`}
-        >
-          📋 Staff
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-950">
+      <nav className="bg-gray-900 border-b border-yellow-500 p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-yellow-400">🍸 Cheers</h1>
+          <div className="space-x-4">
+            <button
+              onClick={() => setCurrentView('selection')}
+              className={`px-4 py-2 rounded font-bold transition ${
+                currentView === 'selection'
+                  ? 'bg-yellow-500 text-black'
+                  : 'bg-gray-800 text-gray-100 hover:bg-gray-700'
+              }`}
+            >
+              Order
+            </button>
+            <button
+              onClick={() => setCurrentView('staff')}
+              className={`px-4 py-2 rounded font-bold transition ${
+                currentView === 'staff'
+                  ? 'bg-yellow-500 text-black'
+                  : 'bg-gray-800 text-gray-100 hover:bg-gray-700'
+              }`}
+            >
+              Staff ({orders.length})
+            </button>
+          </div>
+        </div>
+      </nav>
 
-      {view === 'customer' && <CustomerView />}
-      {view === 'staff' && <StaffView />}
+      {currentView === 'selection' && (
+        <BarSelectionView
+          bars={barsData}
+          userLocation={userLocation}
+          onSelectBar={handleSelectBar}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          zipCode={zipCode}
+          onZipCodeChange={setZipCode}
+          onZipCodeSearch={handleZipCodeSearch}
+        />
+      )}
+
+      {currentView === 'bar' && (
+        <BarDetailView
+          selectedBar={selectedBar}
+          onBack={() => setCurrentView('selection')}
+          onPlaceOrder={handlePlaceOrder}
+        />
+      )}
+
+      {currentView === 'staff' && (
+        <StaffView orders={orders} onClearOrder={handleClearOrder} />
+      )}
     </div>
   );
 }
