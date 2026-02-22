@@ -72,6 +72,7 @@ export default function BarOrderApp() {
   const mapRef = useRef(null);
   const googleMapRef = useRef(null);
   const markersRef = useRef([]);
+  const zipCodeRef = useRef('');
 
   // Load Google Maps script
   useEffect(() => {
@@ -227,7 +228,8 @@ export default function BarOrderApp() {
 
   const handleZipCodeSearch = useCallback(async (e) => {
     e.preventDefault();
-    if (!zipCode || zipCode.length !== 5) {
+    const currentZip = zipCodeRef.current;
+    if (!currentZip || currentZip.length !== 5) {
       alert('Please enter a valid 5-digit ZIP code');
       return;
     }
@@ -235,9 +237,9 @@ export default function BarOrderApp() {
     try {
       // Use Google Geocoding API to convert ZIP to coordinates
       const apiKey = 'API_KEY'; // Replace with your actual key
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode},USA&key=${apiKey}`;
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentZip},USA&key=${apiKey}`;
       
-      console.log('Geocoding request for:', zipCode);
+      console.log('Geocoding request for:', currentZip);
       const response = await fetch(url);
       const data = await response.json();
       
@@ -261,7 +263,7 @@ export default function BarOrderApp() {
         if (data.status === 'REQUEST_DENIED') {
           alert('API key error. Please check that Geocoding API is enabled and the API key is correct.');
         } else if (data.status === 'ZERO_RESULTS') {
-          alert('No results found for ZIP code: ' + zipCode + '. Please try a different ZIP code.');
+          alert('No results found for ZIP code: ' + currentZip + '. Please try a different ZIP code.');
         } else {
           alert('Could not find location. Error: ' + data.status);
         }
@@ -270,7 +272,7 @@ export default function BarOrderApp() {
       console.error('Geocoding error:', error);
       alert('Error searching ZIP code: ' + error.message);
     }
-  }, [zipCode, setUserLocation, setMapView]);
+  }, [setUserLocation, setMapView]);
 
   const filteredBars = searchQuery 
     ? bars.filter(bar => 
@@ -373,6 +375,7 @@ export default function BarOrderApp() {
                 value={zipCode}
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                  zipCodeRef.current = value;
                   setZipCode(value);
                 }}
                 placeholder="Enter ZIP code"
