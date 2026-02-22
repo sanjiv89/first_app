@@ -505,7 +505,7 @@ export default function Cheers() {
 
   // Customer Menu View (same as before)
   const CustomerView = () => {
-    if (!selectedBar) return {BarSelectionView()};
+    if (!selectedBar) return <BarSelectionView />;
 
     const categories = [...new Set(selectedBar.menu.map(item => item.category))];
     const [selectedCategory, setSelectedCategory] = useState('All');
