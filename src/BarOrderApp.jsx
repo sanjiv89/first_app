@@ -55,7 +55,7 @@ const bars = [
   }
 ];
 
-export default function BarOrderApp() {
+export default function Cheers() {
   const [selectedBar, setSelectedBar] = useState(null);
   const [view, setView] = useState('customer');
   const [tableNumber, setTableNumber] = useState(null);
@@ -127,9 +127,9 @@ export default function BarOrderApp() {
           icon: {
             url: `data:image/svg+xml,${encodeURIComponent(`
               <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 0C8.954 0 0 8.954 0 20c0 11.046 20 30 20 30s20-18.954 20-30C40 8.954 31.046 0 20 0z" fill="%237C3AED"/>
+                <path d="M20 0C8.954 0 0 8.954 0 20c0 11.046 20 30 20 30s20-18.954 20-30C40 8.954 31.046 0 20 0z" fill="%23D97706"/>
                 <circle cx="20" cy="20" r="10" fill="white"/>
-                <text x="20" y="26" text-anchor="middle" font-size="16" fill="%237C3AED">${bar.image}</text>
+                <text x="20" y="26" text-anchor="middle" font-size="16" fill="%23D97706">${bar.image}</text>
               </svg>
             `)}`,
             scaledSize: new window.google.maps.Size(40, 50),
@@ -143,12 +143,12 @@ export default function BarOrderApp() {
               <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: bold; color: #333;">${bar.image} ${bar.name}</h3>
               <p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">${bar.address}</p>
               <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <span style="background: #FEF3C7; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">⭐ ${bar.rating}</span>
-                <span style="background: #DBEAFE; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">📍 ${bar.distance} mi</span>
+                <span style="background: #1F2937; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">⭐ ${bar.rating}</span>
+                <span style="background: #1F2937; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">📍 ${bar.distance} mi</span>
               </div>
               <button 
                 onclick="window.selectBarFromMap(${bar.id})"
-                style="width: 100%; background: linear-gradient(to right, #9333EA, #EC4899); color: white; border: none; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px;"
+                style="width: 100%; background: linear-gradient(to right, #D97706, #B45309); color: white; border: none; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px;"
               >
                 View Menu →
               </button>
@@ -181,7 +181,7 @@ export default function BarOrderApp() {
           icon: {
             path: window.google.maps.SymbolPath.CIRCLE,
             scale: 8,
-            fillColor: '#4F46E5',
+            fillColor: '#D97706',
             fillOpacity: 1,
             strokeColor: 'white',
             strokeWeight: 2,
@@ -331,9 +331,9 @@ export default function BarOrderApp() {
 
   // Bar Selection View
   const BarSelectionView = () => (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+      <div className="min-h-screen bg-gray-950">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white p-6 shadow-xl">
+        <div className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 text-white p-6 shadow-xl">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2 mb-2">
               <span className="text-4xl">🍻</span>
@@ -345,16 +345,16 @@ export default function BarOrderApp() {
 
         {/* Location Search */}
         <div className="max-w-4xl mx-auto p-5">
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border-2 border-purple-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <MapPin className="text-purple-600" size={24} />
+          <div className="bg-gray-900 rounded-2xl shadow-xl p-6 mb-6 border-2 border-yellow-800">
+            <h2 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+              <MapPin className="text-yellow-400" size={24} />
               Your Location
             </h2>
             
             {/* Location Button */}
             <button
               onClick={requestLocation}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 mb-4"
+              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 mb-4"
             >
               <Navigation size={24} />
               Use My Location
@@ -362,7 +362,7 @@ export default function BarOrderApp() {
 
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-1 h-px bg-gray-300"></div>
-              <span className="text-gray-500 text-sm">or</span>
+              <span className="text-gray-400 text-sm">or</span>
               <div className="flex-1 h-px bg-gray-300"></div>
             </div>
 
@@ -379,11 +379,11 @@ export default function BarOrderApp() {
                   setZipCode(value);
                 }}
                 placeholder="Enter ZIP code"
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none text-lg"
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none text-lg"
               />
               <button
                 type="submit"
-                className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-all font-bold shadow-md hover:shadow-lg"
+                className="bg-yellow-500 text-white px-6 py-3 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-md hover:shadow-lg"
               >
                 Search
               </button>
@@ -391,13 +391,13 @@ export default function BarOrderApp() {
           </div>
 
           {/* View Toggle: Map vs List */}
-          <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 border-2 border-purple-100 flex gap-2">
+          <div className="bg-gray-900 rounded-2xl shadow-lg p-4 mb-6 border-2 border-yellow-800 flex gap-2">
             <button
               onClick={() => setMapView(false)}
               className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
                 !mapView 
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
+                  : 'bg-gray-800 text-gray-200 hover:bg-gray-200'
               }`}
             >
               <List size={20} />
@@ -407,8 +407,8 @@ export default function BarOrderApp() {
               onClick={() => setMapView(true)}
               className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
                 mapView 
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
+                  : 'bg-gray-800 text-gray-200 hover:bg-gray-200'
               }`}
             >
               <Map size={20} />
@@ -418,13 +418,13 @@ export default function BarOrderApp() {
 
           {/* Map View */}
           {mapView ? (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-purple-100">
+            <div className="bg-gray-900 rounded-2xl shadow-xl overflow-hidden border-2 border-yellow-800">
               <div 
                 ref={mapRef} 
                 className="w-full h-[500px]"
               />
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50">
-                <p className="text-sm text-gray-600 text-center">
+              <div className="p-4 bg-gradient-to-r from-gray-900 to-black">
+                <p className="text-sm text-gray-300 text-center">
                   📍 Click on a marker to see bar details and view menu
                 </p>
               </div>
@@ -432,7 +432,7 @@ export default function BarOrderApp() {
           ) : (
             <>
               {/* Search Bar */}
-              <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 border-2 border-purple-100">
+              <div className="bg-gray-900 rounded-2xl shadow-lg p-4 mb-6 border-2 border-yellow-800">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
@@ -440,15 +440,15 @@ export default function BarOrderApp() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search bars by name or address..."
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:outline-none text-lg"
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none text-lg"
                   />
                 </div>
               </div>
 
               {/* Bars List */}
               <div className="space-y-4">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <MapPin className="text-purple-600" size={24} />
+                <h3 className="text-xl font-bold text-gray-100 flex items-center gap-2">
+                  <MapPin className="text-yellow-400" size={24} />
                   Nearby Bars ({filteredBars.length})
                 </h3>
                 
@@ -458,8 +458,8 @@ export default function BarOrderApp() {
                     onClick={() => setSelectedBar(bar)}
                     onMouseEnter={() => setHoveredBar(bar.id)}
                     onMouseLeave={() => setHoveredBar(null)}
-                    className={`bg-white rounded-2xl shadow-lg p-5 hover:shadow-2xl transition-all cursor-pointer border-2 ${
-                      hoveredBar === bar.id ? 'border-purple-400 scale-105' : 'border-purple-100'
+                    className={`bg-gray-900 rounded-2xl shadow-lg p-5 hover:shadow-2xl transition-all cursor-pointer border-2 ${
+                      hoveredBar === bar.id ? 'border-purple-400 scale-105' : 'border-yellow-800'
                     } transform group`}
                   >
                     <div className="flex items-start gap-4">
@@ -467,25 +467,25 @@ export default function BarOrderApp() {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h3 className="text-2xl font-bold text-gray-800 group-hover:text-purple-600 transition-colors">
+                            <h3 className="text-2xl font-bold text-gray-100 group-hover:text-yellow-400 transition-colors">
                               {bar.name}
                             </h3>
-                            <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                            <p className="text-sm text-gray-300 flex items-center gap-1 mt-1">
                               <MapPin size={14} />
                               {bar.address}
                             </p>
                           </div>
-                          <ChevronRight className="text-purple-600 group-hover:translate-x-1 transition-transform" size={28} />
+                          <ChevronRight className="text-yellow-400 group-hover:translate-x-1 transition-transform" size={28} />
                         </div>
                         
                         <div className="flex items-center gap-4 mt-3">
                           <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-full">
                             <Star size={16} fill="#FCD34D" className="text-yellow-400" />
-                            <span className="font-bold text-gray-800">{bar.rating}</span>
+                            <span className="font-bold text-gray-100">{bar.rating}</span>
                           </div>
-                          <div className="flex items-center gap-1 bg-purple-50 px-3 py-1 rounded-full">
-                            <MapPin size={16} className="text-purple-600" />
-                            <span className="font-semibold text-purple-700">{bar.distance} mi away</span>
+                          <div className="flex items-center gap-1 bg-gray-900 px-3 py-1 rounded-full">
+                            <MapPin size={16} className="text-yellow-400" />
+                            <span className="font-semibold text-yellow-500">{bar.distance} mi away</span>
                           </div>
                           <div className="bg-green-50 px-3 py-1 rounded-full">
                             <span className="font-semibold text-green-700">Open Now</span>
@@ -505,7 +505,7 @@ export default function BarOrderApp() {
 
   // Customer Menu View (same as before)
   const CustomerView = () => {
-    if (!selectedBar) return <BarSelectionView />;
+    if (!selectedBar) return {BarSelectionView()};
 
     const categories = [...new Set(selectedBar.menu.map(item => item.category))];
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -515,14 +515,14 @@ export default function BarOrderApp() {
       : selectedBar.menu.filter(item => item.category === selectedCategory);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+      <div className="min-h-screen bg-gray-950">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 text-white p-5 sticky top-0 z-10 shadow-2xl">
+        <div className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 text-white p-5 sticky top-0 z-10 shadow-2xl">
           <div className="flex justify-between items-center max-w-4xl mx-auto">
             <div className="flex-1">
               <button
                 onClick={() => setSelectedBar(null)}
-                className="text-sm opacity-90 hover:opacity-100 flex items-center gap-1 mb-2 bg-white/20 px-3 py-1 rounded-full"
+                className="text-sm opacity-90 hover:opacity-100 flex items-center gap-1 mb-2 bg-gray-900/20 px-3 py-1 rounded-full"
               >
                 ← Change Bar
               </button>
@@ -532,13 +532,13 @@ export default function BarOrderApp() {
               </h1>
               {tableNumber && (
                 <p className="text-sm opacity-90 mt-1 flex items-center gap-1">
-                  <span className="bg-white/20 px-2 py-0.5 rounded-full">Table {tableNumber}</span>
+                  <span className="bg-gray-900/20 px-2 py-0.5 rounded-full">Table {tableNumber}</span>
                 </p>
               )}
             </div>
             <button 
               onClick={() => setShowCart(true)}
-              className="relative bg-white text-purple-700 px-5 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-purple-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              className="relative bg-gray-900 text-yellow-500 px-5 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-900 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
             >
               <ShoppingCart size={22} />
               <span className="hidden sm:inline">Cart</span>
@@ -563,14 +563,14 @@ export default function BarOrderApp() {
         )}
 
         {/* Category Filter */}
-        <div className="bg-white/80 backdrop-blur-md border-b border-purple-100 sticky top-[100px] z-10 shadow-md">
+        <div className="bg-gray-900/80 backdrop-blur-md border-b border-yellow-800 sticky top-[100px] z-10 shadow-md">
           <div className="max-w-4xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
             <button
               onClick={() => setSelectedCategory('All')}
               className={`px-5 py-2.5 rounded-full whitespace-nowrap transition-all font-semibold shadow-md ${
                 selectedCategory === 'All' 
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105' 
-                  : 'bg-white text-gray-700 hover:bg-purple-50 hover:scale-105'
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg scale-105' 
+                  : 'bg-gray-900 text-gray-200 hover:bg-gray-900 hover:scale-105'
               }`}
             >
               ✨ All Drinks
@@ -581,8 +581,8 @@ export default function BarOrderApp() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-5 py-2.5 rounded-full whitespace-nowrap transition-all font-semibold shadow-md ${
                   selectedCategory === cat 
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105' 
-                    : 'bg-white text-gray-700 hover:bg-purple-50 hover:scale-105'
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg scale-105' 
+                    : 'bg-gray-900 text-gray-200 hover:bg-gray-900 hover:scale-105'
                 }`}
               >
                 {cat}
@@ -597,7 +597,7 @@ export default function BarOrderApp() {
             {filteredMenu.map(item => (
               <div 
                 key={item.id} 
-                className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-purple-100 hover:border-purple-300 relative group"
+                className="bg-gray-900 rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-yellow-800 hover:border-purple-300 relative group"
               >
                 {item.popular && (
                   <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg z-10">
@@ -611,20 +611,20 @@ export default function BarOrderApp() {
                       <div className="flex items-start gap-4 mb-3">
                         <div className="text-6xl drop-shadow-lg">{item.image}</div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-xl text-gray-800 mb-1">{item.name}</h3>
-                          <p className="text-sm text-gray-500 mb-2">{item.description}</p>
-                          <span className="inline-block bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-semibold">
+                          <h3 className="font-bold text-xl text-gray-100 mb-1">{item.name}</h3>
+                          <p className="text-sm text-gray-400 mb-2">{item.description}</p>
+                          <span className="inline-block bg-gray-800 text-yellow-500 text-xs px-3 py-1 rounded-full font-semibold">
                             {item.category}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-4">
-                        <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <p className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
                           ${item.price}
                         </p>
                         <button
                           onClick={() => addToCart(item)}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2 font-bold"
+                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2 font-bold"
                         >
                           <Plus size={20} />
                           Add
@@ -641,22 +641,22 @@ export default function BarOrderApp() {
         {/* Cart Overlay - same as before */}
         {showCart && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
-            <div className="bg-white w-full md:max-w-2xl md:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 flex justify-between items-center shadow-lg z-10">
+            <div className="bg-gray-900 w-full md:max-w-2xl md:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="sticky top-0 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-5 flex justify-between items-center shadow-lg z-10">
                 <div>
                   <h2 className="text-2xl font-bold">Your Order</h2>
                   <p className="text-sm opacity-90">{selectedBar.name} • {cart.length} {cart.length === 1 ? 'item' : 'items'}</p>
                 </div>
                 <button 
                   onClick={() => setShowCart(false)} 
-                  className="p-2 hover:bg-white/20 rounded-full transition-all"
+                  className="p-2 hover:bg-gray-900/20 rounded-full transition-all"
                 >
                   <X size={28} />
                 </button>
               </div>
 
               {cart.length === 0 ? (
-                <div className="p-12 text-center text-gray-500">
+                <div className="p-12 text-center text-gray-400">
                   <ShoppingCart size={64} className="mx-auto mb-4 opacity-30" />
                   <p className="text-xl font-semibold mb-2">Your cart is empty</p>
                   <p className="text-sm">Add some drinks to get started!</p>
@@ -665,29 +665,29 @@ export default function BarOrderApp() {
                 <>
                   <div className="p-5 space-y-3">
                     {cart.map(item => (
-                      <div key={item.id} className="flex items-center gap-4 bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-2xl border-2 border-purple-100 shadow-md">
+                      <div key={item.id} className="flex items-center gap-4 bg-gradient-to-r from-gray-900 to-black p-4 rounded-2xl border-2 border-yellow-800 shadow-md">
                         <span className="text-5xl">{item.image}</span>
                         <div className="flex-1">
-                          <h4 className="font-bold text-lg text-gray-800">{item.name}</h4>
-                          <p className="text-sm text-gray-600">${item.price} each</p>
+                          <h4 className="font-bold text-lg text-gray-100">{item.name}</h4>
+                          <p className="text-sm text-gray-300">${item.price} each</p>
                         </div>
-                        <div className="flex items-center gap-3 bg-white rounded-xl p-2 shadow-md">
+                        <div className="flex items-center gap-3 bg-gray-900 rounded-xl p-2 shadow-md">
                           <button
                             onClick={() => updateQuantity(item.id, -1)}
-                            className="bg-purple-100 text-purple-700 p-2 rounded-lg hover:bg-purple-200 transition-all"
+                            className="bg-gray-800 text-yellow-500 p-2 rounded-lg hover:bg-purple-200 transition-all"
                           >
                             <Minus size={18} />
                           </button>
                           <span className="w-10 text-center font-bold text-lg">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, 1)}
-                            className="bg-purple-100 text-purple-700 p-2 rounded-lg hover:bg-purple-200 transition-all"
+                            className="bg-gray-800 text-yellow-500 p-2 rounded-lg hover:bg-purple-200 transition-all"
                           >
                             <Plus size={18} />
                           </button>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-xl text-purple-700">${(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-bold text-xl text-yellow-500">${(item.price * item.quantity).toFixed(2)}</p>
                           <button
                             onClick={() => removeFromCart(item.id)}
                             className="text-red-500 text-sm hover:underline font-semibold"
@@ -699,22 +699,22 @@ export default function BarOrderApp() {
                     ))}
                   </div>
 
-                  <div className="sticky bottom-0 bg-white border-t-2 border-purple-100 p-5 shadow-2xl">
+                  <div className="sticky bottom-0 bg-gray-900 border-t-2 border-yellow-800 p-5 shadow-2xl">
                     <div className="flex justify-between items-center mb-4">
-                      <span className="text-xl font-semibold text-gray-700">Total</span>
-                      <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <span className="text-xl font-semibold text-gray-200">Total</span>
+                      <span className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
                         ${getCartTotal().toFixed(2)}
                       </span>
                     </div>
                     <button
                       onClick={handleCheckout}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-5 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-5 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
                     >
                       <CreditCard size={28} />
                       Pay ${getCartTotal().toFixed(2)} & Order
                       <ChevronRight size={24} />
                     </button>
-                    <p className="text-xs text-center text-gray-500 mt-3">
+                    <p className="text-xs text-center text-gray-400 mt-3">
                       💳 Secure payment powered by Stripe (Demo Mode)
                     </p>
                   </div>
@@ -735,7 +735,7 @@ export default function BarOrderApp() {
           <h1 className="text-3xl font-bold">Staff Dashboard</h1>
           <p className="text-sm opacity-90 mt-1">Manage incoming orders</p>
         </div>
-        <div className="text-center text-gray-600">
+        <div className="text-center text-gray-300">
           <Clock size={64} className="mx-auto mb-4 opacity-30" />
           <p className="text-xl font-semibold">No orders yet</p>
           <p className="text-sm">Orders will appear here once customers start ordering</p>
@@ -751,7 +751,7 @@ export default function BarOrderApp() {
         <button 
           onClick={() => setView('customer')}
           className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-            view === 'customer' ? 'bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg' : 'bg-gray-700 hover:bg-gray-600'
+            view === 'customer' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 shadow-lg' : 'bg-gray-700 hover:bg-gray-600'
           }`}
         >
           👥 Customer
